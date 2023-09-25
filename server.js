@@ -7,7 +7,7 @@ dotenv.config()
 
 
 const app = express();
-
+app.use(express.json())
 
 class Database {
   constructor() {
@@ -35,7 +35,43 @@ const userSchema = new mongoose.Schema({
   age: Number,
 });
 
+// Using schema to build Mongoose models
+const User = mongoose.model('User', userSchema);
+const newUser = new User({
+  name: 'Elena John',
+  email: 'elena.john@example.com',
+  age: 22,
+});
 
+newUser.save()
+.then(() => {
+  console.log('Save User at MongoDB');
+})
+.catch((error) => {
+  console.error(error);
+});
+
+
+// performing POST and GET endpoints using Express framework
+app.post("/user", async (request, response) => {
+    console.log("user Data : ", request.body)
+  const user = new User(request.body);
+  try {
+    await user.save();
+    response.send(user);
+  } catch (error) {
+    response.status(500).send(error);
+  }
+});
+
+app.get("/users", async (request, response) => {
+  const users = await User.find({});
+  try {
+    response.send(users);
+  } catch (error) {
+    response.status(500).send(error);
+  }
+});
 
 
 app.use(express.json());
